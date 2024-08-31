@@ -46,6 +46,12 @@ type Config struct {
 		DiscordSignLogsIconURL    string
 		DiscordStaffAlertsWebhook string
 	}
+	Translation struct {
+		Enabled                         bool
+		TokenPrefixes                   []string
+		TranslateRawTextInEntityNameTag string
+		DefaultLocale                   string
+	}
 }
 
 func ReadConfig() Config {

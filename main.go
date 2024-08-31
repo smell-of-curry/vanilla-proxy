@@ -44,5 +44,11 @@ func loadHandlers() handler.HandlerManager {
 	h.RegisterHandler(packet.IDItemStackRequest, custom_handlers.ItemStackRequestHandler{})
 	h.RegisterHandler(packet.IDPlayerList, custom_handlers.PlayerListHandler{})
 
+	if proxy.ProxyInstance.Config.Translation.Enabled {
+		custom_handlers.ReadLangs()
+		h.RegisterHandler(packet.IDAddActor, custom_handlers.NameTagTranslateHandlerAddEntity{})
+		h.RegisterHandler(packet.IDSetActorData, custom_handlers.NameTagTranslateHandlerUpdateEntity{})
+	}
+
 	return h
 }

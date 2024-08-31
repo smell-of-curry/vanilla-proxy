@@ -1,0 +1,6 @@
+entity.test.name=Тестовая сущность
+
+# Some comment
+  # Another comment
+
+item.test.name=Тестовый предмет  # Preserved
