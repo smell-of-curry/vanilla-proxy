@@ -26,7 +26,7 @@ var ignored = []uint32{
 	packet.IDCraftingData,
 	packet.IDBiomeDefinitionList,
 	packet.IDPlayerList,
-	packet.IDItemComponent,
+	packet.IDItemRegistry,
 	packet.IDLevelEvent,
 	packet.IDSetActorMotion,
 	packet.IDUpdateAttributes,

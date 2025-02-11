@@ -13,7 +13,7 @@ type Worlds struct {
 	// Commands that were sent by BDS and are available to the player.
 	BDSAvailableCommands packet.AvailableCommands
 	// ItemComponentEntries holds a list of all custom items with their respective components set.
-	ItemComponentEntries []protocol.ItemComponentEntry
+	ItemComponentEntries []protocol.ItemEntry
 	// Items holds a list of all custom items that are available in the server.
 	Items []protocol.ItemEntry
 	// CustomBlocks holds a list of all custom blocks that are available in the server.
@@ -63,7 +63,7 @@ func (worlds *Worlds) GetItemEntry(networkID int32) *protocol.ItemEntry {
 	return &item
 }
 
-func (worlds *Worlds) GetItemComponentEntry(name string) *protocol.ItemComponentEntry {
+func (worlds *Worlds) GetItemComponentEntry(name string) *protocol.ItemEntry {
 	for _, entry := range worlds.ItemComponentEntries {
 		if entry.Name == name {
 			return &entry
@@ -72,16 +72,16 @@ func (worlds *Worlds) GetItemComponentEntry(name string) *protocol.ItemComponent
 	return nil
 }
 
-func (worlds *Worlds) GetItemComponentEntries() []protocol.ItemComponentEntry {
+func (worlds *Worlds) GetItemComponentEntries() []protocol.ItemEntry {
 	return worlds.ItemComponentEntries
 }
 
-func (worlds *Worlds) AddItemComponentEntry(entry *protocol.ItemComponentEntry) {
+func (worlds *Worlds) AddItemComponentEntry(entry *protocol.ItemEntry) {
 	worlds.ItemComponentEntries = append(worlds.ItemComponentEntries, *entry)
 }
 
-func (worlds *Worlds) RemoveItemComponentEntry(entry *protocol.ItemComponentEntry) {
-	idx := slices.IndexFunc(worlds.ItemComponentEntries, func(e protocol.ItemComponentEntry) bool {
+func (worlds *Worlds) RemoveItemComponentEntry(entry *protocol.ItemEntry) {
+	idx := slices.IndexFunc(worlds.ItemComponentEntries, func(e protocol.ItemEntry) bool {
 		return e.Name == entry.Name
 	})
 	if idx == -1 {
@@ -90,6 +90,6 @@ func (worlds *Worlds) RemoveItemComponentEntry(entry *protocol.ItemComponentEntr
 	worlds.ItemComponentEntries = append(worlds.ItemComponentEntries[:idx], worlds.ItemComponentEntries[idx+1:]...)
 }
 
-func (worlds *Worlds) SetItemComponentEntries(entries []protocol.ItemComponentEntry) {
+func (worlds *Worlds) SetItemComponentEntries(entries []protocol.ItemEntry) {
 	worlds.ItemComponentEntries = entries
 }

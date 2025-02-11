@@ -38,7 +38,7 @@ func loadHandlers() handler.HandlerManager {
 	h.RegisterHandler(packet.IDPlayerAuthInput, custom_handlers.ClaimPlayerAuthInputHandler{})
 	h.RegisterHandler(packet.IDText, custom_handlers.CustomCommandRegisterHandler{})
 	h.RegisterHandler(packet.IDText, custom_handlers.ChatLoggingHandler{})
-	h.RegisterHandler(packet.IDItemComponent, custom_handlers.ItemComponentHandler{})
+	h.RegisterHandler(packet.IDItemRegistry, custom_handlers.ItemComponentHandler{})
 	h.RegisterHandler(packet.IDContainerOpen, custom_handlers.OpenContainerHandler{})
 	h.RegisterHandler(packet.IDContainerClose, custom_handlers.ContainerCloseHandler{})
 	h.RegisterHandler(packet.IDItemStackRequest, custom_handlers.ItemStackRequestHandler{})

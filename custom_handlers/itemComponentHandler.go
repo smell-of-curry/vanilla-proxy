@@ -10,7 +10,7 @@ type ItemComponentHandler struct {
 }
 
 func (ItemComponentHandler) Handle(pk packet.Packet, player human.Human) (bool, packet.Packet, error) {
-	dataPacket := pk.(*packet.ItemComponent)
+	dataPacket := pk.(*packet.ItemRegistry)
 
 	proxy.ProxyInstance.Worlds.SetItemComponentEntries(dataPacket.Items)
 
