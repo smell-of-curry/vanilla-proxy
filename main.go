@@ -1,6 +1,9 @@
 package main
 
 import (
+	"fmt"
+	"net/http"
+
 	"github.com/HyPE-Network/vanilla-proxy/custom_handlers"
 	"github.com/HyPE-Network/vanilla-proxy/handler"
 	"github.com/HyPE-Network/vanilla-proxy/handler/handlers"
@@ -10,7 +13,13 @@ import (
 	"github.com/sandertv/gophertunnel/minecraft/protocol/packet"
 )
 
+import _ "net/http/pprof"
+
 func main() {
+	go func() {
+		fmt.Println(http.ListenAndServe("0.0.0.0:1010", nil))
+	}()
+
 	log.Logger = log.New()
 	log.Logger.Debugln("Logger has been started!")
 
