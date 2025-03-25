@@ -4,6 +4,7 @@
         "Debugln",
         "Errorln",
         "gophertunnel",
+        "iconcache",
         "Infoln",
         "logrus",
         "mathgl",
@@ -15,6 +16,7 @@
         "Respawn",
         "Runtimes",
         "sandertv",
+        "Warnf",
         "Warnln",
         "XUID"
     ]
