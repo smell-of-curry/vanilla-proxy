@@ -264,7 +264,7 @@ func GetXboxIconLink(xuid string) (string, error) {
 		if resp.StatusCode == http.StatusTooManyRequests {
 			// Handle 429 error with retry after exponential backoff
 			maxRetries--
-			log.Logger.Warnf("Received 429 Too Many Requests, retrying... attempt %d\n", maxRetries)
+			log.Logger.Warn("Received 429 Too Many Requests, retrying...\n", "attempt", maxRetries)
 
 			retryAfter := resp.Header.Get("Retry-After")
 			if retryAfter != "" {

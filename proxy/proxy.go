@@ -22,7 +22,6 @@ import (
 	"github.com/HyPE-Network/vanilla-proxy/proxy/whitelist"
 	"github.com/HyPE-Network/vanilla-proxy/proxy/world"
 	"github.com/HyPE-Network/vanilla-proxy/utils"
-	"github.com/HyPE-Network/vanilla-proxy/utils/iconcache"
 	"github.com/google/uuid"
 
 	"github.com/sandertv/go-raknet"

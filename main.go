@@ -30,12 +30,6 @@ func main() {
 	// Start the handlers
 	handlerManager := loadHandlers()
 
-	// Register any additional cleanup tasks
-	proxy.ProxyInstance.RegisterCleanupTask(func() {
-		// Trigger one final save of the icon cache to disk
-		iconcache.GetInstance().SaveToDisk()
-	})
-
 	// Start the proxy in a goroutine
 	go func() {
 		err := proxy.ProxyInstance.Start(handlerManager)
