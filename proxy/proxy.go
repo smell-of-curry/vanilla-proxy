@@ -22,6 +22,7 @@ import (
 	"github.com/HyPE-Network/vanilla-proxy/proxy/whitelist"
 	"github.com/HyPE-Network/vanilla-proxy/proxy/world"
 	"github.com/HyPE-Network/vanilla-proxy/utils"
+	"github.com/HyPE-Network/vanilla-proxy/utils/iconcache"
 	"github.com/google/uuid"
 
 	"github.com/sandertv/go-raknet"
@@ -45,6 +46,8 @@ type Proxy struct {
 	ResourcePacks     []*resource.Pack
 	ctx               context.Context
 	cancel            context.CancelFunc
+	cleanupTasks      []func()
+	tasksMu           sync.Mutex
 }
 
 func New(config utils.Config) *Proxy {
@@ -62,6 +65,7 @@ func New(config utils.Config) *Proxy {
 		WhitelistManager:  whitelist.Init(),
 		ctx:               ctx,
 		cancel:            cancel,
+		cleanupTasks:      make([]func(), 0),
 	}
 
 	// Initialize an empty slice of *resource.Pack
@@ -409,8 +413,23 @@ func (arg *Proxy) startPacketHandlers(player human.Human, conn *minecraft.Conn, 
 	}()
 }
 
+// RegisterCleanupTask adds a function to be called during proxy shutdown
+func (arg *Proxy) RegisterCleanupTask(task func()) {
+	arg.tasksMu.Lock()
+	defer arg.tasksMu.Unlock()
+	arg.cleanupTasks = append(arg.cleanupTasks, task)
+}
+
 func (arg *Proxy) Shutdown() {
 	log.Logger.Info("Shutting down proxy")
+
+	// Run all cleanup tasks first
+	arg.tasksMu.Lock()
+	for _, task := range arg.cleanupTasks {
+		task()
+	}
+	arg.tasksMu.Unlock()
+
 	arg.cancel() // This will cancel the context and stop all goroutines
 	if arg.Listener != nil {
 		arg.Listener.Close() // Close the listener if it's open
