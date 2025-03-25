@@ -76,20 +76,6 @@ func (worlds *Worlds) GetItemComponentEntries() []protocol.ItemEntry {
 	return worlds.ItemComponentEntries
 }
 
-func (worlds *Worlds) AddItemComponentEntry(entry *protocol.ItemEntry) {
-	worlds.ItemComponentEntries = append(worlds.ItemComponentEntries, *entry)
-}
-
-func (worlds *Worlds) RemoveItemComponentEntry(entry *protocol.ItemEntry) {
-	idx := slices.IndexFunc(worlds.ItemComponentEntries, func(e protocol.ItemEntry) bool {
-		return e.Name == entry.Name
-	})
-	if idx == -1 {
-		return
-	}
-	worlds.ItemComponentEntries = append(worlds.ItemComponentEntries[:idx], worlds.ItemComponentEntries[idx+1:]...)
-}
-
 func (worlds *Worlds) SetItemComponentEntries(entries []protocol.ItemEntry) {
 	worlds.ItemComponentEntries = entries
 }
