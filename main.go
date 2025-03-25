@@ -1,6 +1,10 @@
 package main
 
 import (
+	"os"
+	"os/signal"
+	"syscall"
+
 	"github.com/HyPE-Network/vanilla-proxy/custom_handlers"
 	"github.com/HyPE-Network/vanilla-proxy/handler"
 	"github.com/HyPE-Network/vanilla-proxy/handler/handlers"
@@ -14,20 +18,48 @@ func main() {
 	log.Logger = log.New()
 	log.Logger.Debug("Logger has been started!")
 
+	// Load configuration
 	config := utils.ReadConfig()
 
 	proxy.ProxyInstance = proxy.New(config)
 
-	err := proxy.ProxyInstance.Start(loadHandlers())
-	if err != nil {
-		log.Logger.Panicln("Error while starting server: ", err)
-	}
+	// Create a channel to catch shutdown signals
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
 
+	// Start the handlers
+	handlerManager := loadHandlers()
+
+	// Register any additional cleanup tasks
+	proxy.ProxyInstance.RegisterCleanupTask(func() {
+		// Trigger one final save of the icon cache to disk
+		iconcache.GetInstance().SaveToDisk()
+	})
+
+	// Start the proxy in a goroutine
+	go func() {
+		err := proxy.ProxyInstance.Start(handlerManager)
+		if err != nil {
+			log.Logger.Error("Error while starting server", "error", err)
+		}
+	}()
+
+	// Wait for shutdown signal
+	<-sigCh
+
+	// Perform graceful shutdown
+	proxy.ProxyInstance.Shutdown()
 }
 
 func loadHandlers() handler.HandlerManager {
-	utils.NewRepeatingTask(60, func() {
+	// Store the repeating task so it can be stopped if needed
+	claimTask := utils.NewRepeatingTask(60, func() {
 		custom_handlers.FetchClaims()
+	})
+
+	// Register the task for cleanup
+	proxy.ProxyInstance.RegisterCleanupTask(func() {
+		claimTask.Stop()
 	})
 
 	h := handlers.New()
