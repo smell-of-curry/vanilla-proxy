@@ -1,38 +1,51 @@
-[Connection]
-  ProxyAddress = "0.0.0.0:19132"
-  RemoteAddress = "0.0.0.0:19134"
 
 [Api]
-  ApiHost = "https://pokebedrock.com"
-  ApiKey = "..."
+ApiHost = "https://pokebedrock.com"
+ApiKey = "xxxxxxxx-xxxxxxxx-xxxxxxxx"
+XboxApiKey = "xxxxxxxx-xxxxxxxx-xxxxxxxx"
+
+[Bot]
+DisplayName = ""
+Enabled = false
+XUID = ""
+
+[Connection]
+ProxyAddress = "0.0.0.0:19132"
+RemoteAddress = "0.0.0.0:19134"
 
 [Database]
-  Host = "http://127.0.0.1:3000"
-  Key = "..."
-  Name = "testing"
+Host = "http://127.0.0.1:3230"
+Key = "xxxxxxxx-xxxxxxxx-xxxxxxxx"
+Name = "testing"
 
 [Logging]
-  DiscordChatLogsWebhook = "..."
-  DiscordCommandLogsWebhook = "..."
-  DiscordSignLogsIconURL = "https://media.forgecdn.net/avatars/121/268/636409261203329160.png"
-  DiscordSignLogsWebhook = "..."
-  DiscordStaffAlertsWebhook = "..."
+DiscordChatLogsWebhook = "https://discord.com/api/webhooks/1111111111111111/xxxxxxxx-xxxxxxxx-xxxxxxxx"
+DiscordCommandLogsWebhook = "https://discord.com/api/webhooks/1111111111111111/xxxxxxxx-xxxxxxxx-xxxxxxxx"
+DiscordSignLogsIconURL = "https://media.forgecdn.net/avatars/121/268/636409261203329160.png"
+DiscordSignLogsWebhook = "https://discord.com/api/webhooks/1111111111111111/xxxxxxxx-xxxxxxxx-xxxxxxxx"
+DiscordStaffAlertsWebhook = "https://discord.com/api/webhooks/1111111111111111/xxxxxxxx-xxxxxxxx-xxxxxxxx"
+
+[Rcon]
+Enabled = false
+Password = ""
+Port = 0
 
 [Resources]
-  PackURLs = ["https://github.com/smell-of-curry/pokebedrock-res/releases/download/v2.10.22/PokeBedrock.RES.2.10.22.mcpack"]
-  PackPaths = []
+PackURLs = []
+PackPaths = []
 
 [Server]
-  SecuredSlots = 5
-  DisableXboxAuth = false
-  Prefix = "TESTING"
-  ViewDistance = 10
-  Whitelist = true
-  FlushRate = 50
+SecuredSlots = 5
+DisableXboxAuth = false
+Ops = ["Smell of curry"]
+Prefix = "TESTING"
+ViewDistance = 10
+Whitelist = true
+FlushRate = 10
 
 [WorldBorder]
-  Enabled = true
-  MaxX = 6000
-  MaxZ = 6000
-  MinX = -6000
-  MinZ = -6000
+Enabled = true
+MaxX = 12000
+MaxZ = 12000
+MinX = -12000
+MinZ = -12000
