@@ -168,6 +168,12 @@ func (plm *PlayerlistManager) SetPlayer(xuid string, conn *minecraft.Conn) error
 	}
 	plm.Players[xuid] = player
 
+	// Save the playerlist to disk
+	return plm.savePlayerlist()
+}
+
+// savePlayerlist saves the current playerlist to the JSON file
+func (plm *PlayerlistManager) savePlayerlist() error {
 	// Create a file lock
 	lock := flock.New("playerlist.json.lock")
 	if err := lock.Lock(); err != nil {
