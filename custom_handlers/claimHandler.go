@@ -39,7 +39,7 @@ func FetchClaims() error {
 	}
 
 	RegisteredClaims = claims
-	log.Logger.Printf("Loaded %d claims from the database\n", len(RegisteredClaims))
+	log.Logger.Info("Loaded claims from database", "count", len(RegisteredClaims))
 
 	return nil
 }

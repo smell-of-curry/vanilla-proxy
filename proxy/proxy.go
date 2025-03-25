@@ -50,7 +50,7 @@ type Proxy struct {
 func New(config utils.Config) *Proxy {
 	playerListManager, err := playerlist.Init()
 	if err != nil {
-		log.Logger.Fatalln("Error in initializing playerListManager: ", err)
+		log.Logger.Error("Error in initializing playerListManager", "error", err)
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -69,20 +69,20 @@ func New(config utils.Config) *Proxy {
 
 	// Loop through all the pack URLs and append each pack to the slice
 	for _, url := range Proxy.Config.Resources.PackURLs {
-		log.Logger.Debugln("Reading resource pack from URL:", url)
+		log.Logger.Debug("Reading resource pack from URL", "url", url)
 		resourcePack, err := resource.ReadURL(url)
 		if err != nil {
-			log.Logger.Errorln("Failed to read resource pack from URL:", url, err)
+			log.Logger.Error("Failed to read resource pack from URL", "url", url, "error", err)
 		}
 		resourcePacks = append(resourcePacks, resourcePack)
 	}
 
 	// Loop through all the pack paths and append each pack to the slice
 	for _, path := range Proxy.Config.Resources.PackPaths {
-		log.Logger.Debugln("Reading resource pack from path:", path)
+		log.Logger.Debug("Reading resource pack from path", "path", path)
 		resourcePack, err := resource.ReadPath(path)
 		if err != nil {
-			log.Logger.Errorln("Failed to read resource pack from path:", path, err)
+			log.Logger.Error("Failed to read resource pack from path", "path", path, "error", err)
 		}
 		resourcePacks = append(resourcePacks, resourcePack)
 	}
@@ -101,14 +101,14 @@ func (arg *Proxy) Start(h handler.HandlerManager) error {
 	res, err := raknet.Ping(arg.Config.Connection.RemoteAddress)
 	if err != nil {
 		// Server prob not online, retrying
-		log.Logger.Warnln("Failed to ping server, retrying in 5 seconds:", err)
+		log.Logger.Warn("Failed to ping server, retrying in 5 seconds", "error", err)
 		time.Sleep(time.Second * 5)
 		arg.Start(h)
 		return nil
 	}
 	// Server is online, parse data
 	status := minecraft.ParsePongData(res)
-	log.Logger.Infoln("Server", status.ServerName, "is online with MOTD", status.ServerSubName)
+	log.Logger.Info("Server online", "name", status.ServerName, "motd", status.ServerSubName)
 	p, err := minecraft.NewForeignStatusProvider(arg.Config.Connection.RemoteAddress)
 	if err != nil {
 		return fmt.Errorf("failed to create foreign status provider: %w", err)
@@ -128,20 +128,20 @@ func (arg *Proxy) Start(h handler.HandlerManager) error {
 		return fmt.Errorf("failed to start listener: %w", err)
 	}
 
-	log.Logger.Debugln("Original server address:", arg.Config.Connection.RemoteAddress, "public address:", arg.Config.Connection.ProxyAddress)
-	log.Logger.Println("Proxy has been started on Version", protocol.CurrentVersion, "protocol", protocol.CurrentProtocol)
+	log.Logger.Debug("Original server address", "remote", arg.Config.Connection.RemoteAddress, "public", arg.Config.Connection.ProxyAddress)
+	log.Logger.Info("Proxy started", "version", protocol.CurrentVersion, "protocol", protocol.CurrentProtocol)
 	arg.Handlers = h
 
 	defer func() {
 		if r := recover(); r != nil {
-			log.Logger.Errorf("Recovered from panic in Handling Listener: %v\n%s", r, debug.Stack())
+			log.Logger.Error("Recovered from panic in Handling Listener", "error", r, "stack", debug.Stack())
+			log.Logger.Error("Closing listener", "error", arg.Listener.Close())
 		}
-		log.Logger.Errorf("Closing listener: %v", arg.Listener.Close())
 	}()
 	for {
 		select {
 		case <-arg.ctx.Done():
-			log.Logger.Infoln("Proxy shutting down")
+			log.Logger.Info("Proxy shutting down")
 			return nil
 		default:
 			c, err := arg.Listener.Accept()
@@ -151,18 +151,18 @@ func (arg *Proxy) Start(h handler.HandlerManager) error {
 				}
 
 				// The listener closed, so we should restart it. c==nil
-				log.Logger.Errorf("Listener accept error: %v", err)
+				log.Logger.Error("Listener accept error", "error", err)
 				utils.SendStaffAlertToDiscord("Proxy Listener Closed", "```"+err.Error()+"```", 16711680, []map[string]interface{}{})
 
 				return arg.Start(h)
 			}
 
 			if c == nil {
-				log.Logger.Warnln("Accepted a nil connection.")
+				log.Logger.Warn("Accepted a nil connection")
 				continue
 			}
 
-			log.Logger.Debugln("New connection from", c.RemoteAddr())
+			log.Logger.Debug("New connection", "addr", c.RemoteAddr())
 			go arg.handleConn(c.(*minecraft.Conn))
 		}
 	}
@@ -172,7 +172,7 @@ func (arg *Proxy) Start(h handler.HandlerManager) error {
 func (arg *Proxy) handleConn(conn *minecraft.Conn) {
 	defer func() {
 		if r := recover(); r != nil {
-			log.Logger.Errorf("Recovered from panic in handleConn: %v\n%s", r, debug.Stack())
+			log.Logger.Error("Recovered from panic in handleConn", "error", r, "stack", debug.Stack())
 			if conn != nil {
 				arg.Listener.Disconnect(conn, "An internal error occurred")
 			}
@@ -180,7 +180,7 @@ func (arg *Proxy) handleConn(conn *minecraft.Conn) {
 	}()
 
 	if conn == nil {
-		log.Logger.Warnln("Received nil connection. Skipping handling.")
+		log.Logger.Warn("Received nil connection. Skipping handling")
 		return
 	}
 
@@ -213,13 +213,13 @@ func (arg *Proxy) handleConn(conn *minecraft.Conn) {
 
 	clientData, err := arg.PlayerListManager.GetConnClientData(conn)
 	if err != nil {
-		log.Logger.Errorln("Error in getting clientData: ", err)
+		log.Logger.Error("Error in getting clientData", "error", err)
 		arg.Listener.Disconnect(conn, strings.Split(err.Error(), ": ")[1])
 		return
 	}
 	identityData, err := arg.PlayerListManager.GetConnIdentityData(conn)
 	if err != nil {
-		log.Logger.Errorln("Error in getting identityData: ", err)
+		log.Logger.Error("Error in getting identityData", "error", err)
 		arg.Listener.Disconnect(conn, strings.Split(err.Error(), ": ")[1])
 		return
 	}
@@ -235,11 +235,11 @@ func (arg *Proxy) handleConn(conn *minecraft.Conn) {
 	}.DialTimeout("raknet", arg.Config.Connection.RemoteAddress, time.Second*30)
 
 	if err != nil {
-		log.Logger.Errorln("Failed to dial server:", err)
+		log.Logger.Error("Failed to dial server", "error", err)
 		return
 	}
 
-	log.Logger.Debugln("Server connection established for", serverConn.IdentityData().DisplayName)
+	log.Logger.Debug("Server connection established", "player", serverConn.IdentityData().DisplayName)
 
 	if !arg.initializeConnection(conn, serverConn) {
 		return
@@ -247,13 +247,13 @@ func (arg *Proxy) handleConn(conn *minecraft.Conn) {
 
 	playerXuid := conn.IdentityData().XUID
 	if playerXuid == "" {
-		log.Logger.Errorln("Player XUID is empty, disconnecting player")
+		log.Logger.Error("Player XUID is empty, disconnecting player")
 		arg.Listener.Disconnect(conn, "Failed to get your XUID, please try again!")
 		return
 	}
 
 	player := player.GetPlayer(conn, serverConn)
-	log.Logger.Infoln(player.GetName(), "joined the server")
+	log.Logger.Info("Player joined", "name", player.GetName())
 	player.SendXUIDToAddon()
 	arg.UpdatePlayerDetails(player)
 
@@ -300,7 +300,7 @@ func (arg *Proxy) initializeConnection(conn *minecraft.Conn, serverConn *minecra
 		if err := conn.StartGame(gameData); err != nil {
 			var disc minecraft.DisconnectError
 			if ok := errors.As(err, &disc); !ok {
-				log.Logger.Errorln("Failed to start game on client:", err)
+				log.Logger.Error("Failed to start game on client", "error", err)
 			}
 			success = false
 		}
@@ -310,7 +310,7 @@ func (arg *Proxy) initializeConnection(conn *minecraft.Conn, serverConn *minecra
 		if err := serverConn.DoSpawn(); err != nil {
 			var disc minecraft.DisconnectError
 			if ok := errors.As(err, &disc); !ok {
-				log.Logger.Errorln("Failed to spawn client on server:", err)
+				log.Logger.Error("Failed to spawn client on server", "error", err)
 			}
 			success = false
 		}
@@ -332,7 +332,7 @@ func (arg *Proxy) startPacketHandlers(player human.Human, conn *minecraft.Conn, 
 		defer func() {
 			reason := "Client Connection closed"
 			if r := recover(); r != nil {
-				log.Logger.Errorf("Recovered from panic in HandlePacket from Client: %v\n%s", r, debug.Stack())
+				log.Logger.Error("Recovered from panic in HandlePacket from Client", "error", r, "stack", debug.Stack())
 				reason = "An internal error occurred"
 			}
 
@@ -355,7 +355,7 @@ func (arg *Proxy) startPacketHandlers(player human.Human, conn *minecraft.Conn, 
 
 				ok, pk, err := arg.Handlers.HandlePacket(pk, player, "Client")
 				if err != nil {
-					log.Logger.Errorln("Error handling packet from client", err)
+					log.Logger.Error("Error handling packet from client", "error", err)
 				}
 
 				if ok {
@@ -372,7 +372,7 @@ func (arg *Proxy) startPacketHandlers(player human.Human, conn *minecraft.Conn, 
 		defer func() {
 			reason := "Server Connection closed"
 			if r := recover(); r != nil {
-				log.Logger.Errorf("Recovered from panic in HandlePacket from Server: %v\n%s", r, debug.Stack())
+				log.Logger.Error("Recovered from panic in HandlePacket from Server", "error", r, "stack", debug.Stack())
 				reason = "An internal error occurred"
 			}
 
@@ -395,7 +395,7 @@ func (arg *Proxy) startPacketHandlers(player human.Human, conn *minecraft.Conn, 
 
 				ok, pk, err := arg.Handlers.HandlePacket(pk, player, "Server")
 				if err != nil {
-					log.Logger.Errorln(err)
+					log.Logger.Error("Error", "error", err)
 				}
 
 				if ok {
@@ -410,7 +410,7 @@ func (arg *Proxy) startPacketHandlers(player human.Human, conn *minecraft.Conn, 
 }
 
 func (arg *Proxy) Shutdown() {
-	log.Logger.Infoln("Shutting down proxy")
+	log.Logger.Info("Shutting down proxy")
 	arg.cancel() // This will cancel the context and stop all goroutines
 	if arg.Listener != nil {
 		arg.Listener.Close() // Close the listener if it's open
@@ -425,7 +425,7 @@ func (arg *Proxy) handlePacketError(err error, conn *minecraft.Conn, msg string)
 	}
 	if !strings.Contains(err.Error(), "use of closed network connection") && !strings.Contains(err.Error(), "disconnect.kicked.reason") {
 		// Error is not a disconnect error, so log the error.
-		log.Logger.Errorln(msg, err)
+		log.Logger.Error("Error", "msg", msg, "error", err)
 	}
 }
 
@@ -443,7 +443,7 @@ func (arg *Proxy) PrePlayerDisconnect(player human.Human) {
 	lastLocationString := fmt.Sprintf("[%d, %d, %d]", int(playerLastLocation.X()), int(playerLastLocation.Y()), int(playerLastLocation.Z()))
 
 	if openContainerId != 0 && len(itemInContainers) > 0 {
-		log.Logger.Println(player.GetName(), "has open container:", openContainerId, "while disconnecting, *prob trying to dupe*", lastLocationString)
+		log.Logger.Info("Player disconnecting with open container", "name", player.GetName(), "container", openContainerId, "location", lastLocationString)
 
 		// utils.SendStaffAlertToDiscord("Disconnect with open container!", "A Player Has disconnected with an open container, please investigate!", 16711680, []map[string]interface{}{
 		// 	{
@@ -481,7 +481,7 @@ func (arg *Proxy) PrePlayerDisconnect(player human.Human) {
 		pk := &packet.ItemStackRequest{
 			Requests: []protocol.ItemStackRequest{request},
 		}
-		log.Logger.Debugln("Sending ItemStackRequest to clear container:")
+		log.Logger.Debug("Sending ItemStackRequest to clear container")
 		player.DataPacketToServer(pk)
 
 		player.SetOpenContainerWindowID(0)
@@ -525,7 +525,7 @@ func (arg *Proxy) UpdatePlayerDetails(player human.Human) {
 
 	// Build the URI for the API request
 	uri := arg.Config.Api.ApiHost + "/api/moderation/playerDetails"
-	log.Logger.Printf("Sending \"%s\" playerDetails to: \"%s\"\n", player.GetName(), uri)
+	log.Logger.Info("Sending playerDetails", "name", player.GetName(), "uri", uri)
 
 	// Create the player details payload
 	playerDetails := PlayerDetails{
@@ -537,14 +537,14 @@ func (arg *Proxy) UpdatePlayerDetails(player human.Human) {
 	// Convert player details to JSON
 	jsonData, err := json.Marshal(playerDetails)
 	if err != nil {
-		log.Logger.Errorln("Failed to marshal player details:", err)
+		log.Logger.Error("Failed to marshal player details", "error", err)
 		return
 	}
 
 	// Create a new HTTP POST request
 	req, err := http.NewRequest("POST", uri, bytes.NewBuffer(jsonData))
 	if err != nil {
-		log.Logger.Errorln("Failed to create new request:", err)
+		log.Logger.Error("Failed to create new request", "error", err)
 		return
 	}
 
@@ -556,11 +556,11 @@ func (arg *Proxy) UpdatePlayerDetails(player human.Human) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Logger.Errorln("Failed to send request:", err)
+		log.Logger.Error("Failed to send request", "error", err)
 		return
 	}
 	defer resp.Body.Close()
 
 	// Log the response status
-	log.Logger.Printf("Sent playerDetails to: \"%s\", status: %d\n", uri, resp.StatusCode)
+	log.Logger.Info("Sent playerDetails", "uri", uri, "status", resp.StatusCode)
 }

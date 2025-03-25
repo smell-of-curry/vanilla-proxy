@@ -35,7 +35,7 @@ func Init() (*PlayerlistManager, error) {
 	// Create a file lock
 	lock := flock.New("playerlist.json.lock")
 	if err := lock.Lock(); err != nil {
-		log.Logger.Errorf("error locking playerlist file: %v", err)
+		log.Logger.Error("Error locking playerlist file", "error", err)
 		return nil, err
 	}
 	defer lock.Unlock()
@@ -43,7 +43,7 @@ func Init() (*PlayerlistManager, error) {
 	// Open or create the playerlist.json file
 	file, err := os.OpenFile("playerlist.json", os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
-		log.Logger.Errorf("error opening/creating playerlist: %v", err)
+		log.Logger.Error("Error opening/creating playerlist", "error", err)
 		return nil, err
 	}
 	defer file.Close()
@@ -51,30 +51,30 @@ func Init() (*PlayerlistManager, error) {
 	// Check if the file is empty (newly created)
 	info, err := file.Stat()
 	if err != nil {
-		log.Logger.Errorf("error stating playerlist file: %v", err)
+		log.Logger.Error("Error stating playerlist file", "error", err)
 		return nil, err
 	}
 	if info.Size() == 0 {
 		data, err := json.Marshal(plm.Players)
 		if err != nil {
-			log.Logger.Errorf("error encoding default playerlist: %v", err)
+			log.Logger.Error("Error encoding default playerlist", "error", err)
 			return nil, err
 		}
 		if _, err := file.Write(data); err != nil {
-			log.Logger.Errorf("error writing encoded default playerlist: %v", err)
+			log.Logger.Error("Error writing encoded default playerlist", "error", err)
 			return nil, err
 		}
 	} else {
 		// Read the existing data from the file
 		data := make([]byte, info.Size())
 		if _, err := file.Read(data); err != nil {
-			log.Logger.Errorf("error reading playerlist: %v", err)
+			log.Logger.Error("Error reading playerlist", "error", err)
 			return nil, err
 		}
 
 		// Unmarshal the data into the player map
 		if err := json.Unmarshal(data, &plm.Players); err != nil {
-			log.Logger.Errorf("error decoding playerlist: %v", err)
+			log.Logger.Error("Error decoding playerlist", "error", err)
 			return nil, err
 		}
 	}
@@ -164,39 +164,40 @@ func (plm *PlayerlistManager) SetPlayer(xuid string, conn *minecraft.Conn) error
 		PlayerName:         conn.IdentityData().DisplayName,
 		Identity:           conn.IdentityData().Identity,
 		ClientSelfSignedID: conn.ClientData().SelfSignedID,
+		// IconURL and IconFetchTime will be set when the icon is fetched
 	}
 	plm.Players[xuid] = player
 
 	// Create a file lock
 	lock := flock.New("playerlist.json.lock")
 	if err := lock.Lock(); err != nil {
-		log.Logger.Errorf("error locking playerlist file: %v", err)
+		log.Logger.Error("Error locking playerlist file", "error", err)
 		return err
 	}
 
 	defer func() {
 		if err := lock.Unlock(); err != nil {
-			log.Logger.Errorf("error unlocking playerlist file: %v", err)
+			log.Logger.Error("Error unlocking playerlist file", "error", err)
 		}
 	}()
 
 	// Save the playerlist to disk
 	data, err := json.MarshalIndent(plm.Players, "", "  ")
 	if err != nil {
-		log.Logger.Errorf("error encoding playerlist: %v", err)
+		log.Logger.Error("Error encoding playerlist", "error", err)
 		return err
 	}
 
 	// Open the file for writing
 	file, err := os.OpenFile("playerlist.json", os.O_WRONLY|os.O_TRUNC, 0644)
 	if err != nil {
-		log.Logger.Errorf("error opening playerlist for writing: %v", err)
+		log.Logger.Error("Error opening playerlist for writing", "error", err)
 		return err
 	}
 	defer file.Close()
 
 	if _, err := file.Write(data); err != nil {
-		log.Logger.Errorf("error writing playerlist: %v", err)
+		log.Logger.Error("Error writing playerlist", "error", err)
 		return err
 	}
 

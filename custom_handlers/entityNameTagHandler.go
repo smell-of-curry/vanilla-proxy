@@ -127,14 +127,14 @@ func (h *AddActorNameTagHandler) Handle(pk packet.Packet, player human.Human) (b
 	// Get the current name of the pokemon
 	currentName, ok := dataPacket.ActorData[protocol.EntityDataKeyName].(string)
 	if !ok {
-		log.Logger.Warnln("Could not assert the current name of the pokemon:", dataPacket.ActorData[protocol.EntityDataKeyName])
+		log.Logger.Warn("Could not assert the current name of the pokemon", "metadata", dataPacket.EntityMetadata[protocol.EntityDataKeyName])
 		return true, pk, nil
 	}
 
 	// Get the translated name tag of the sent out pokemon
 	translatedName, err := getTranslatedNameTagOfSentOutPokemon(player, dataPacket.ActorType, currentName)
 	if err != nil {
-		log.Logger.Warnln("Could not get the translated name tag of the sent out pokemon:", err)
+		log.Logger.Warn("Could not get the translated name tag of the sent out pokemon", "error", err)
 		return true, pk, nil
 	}
 
@@ -177,7 +177,7 @@ func (h *SetActorDataNameTagHandler) Handle(pk packet.Packet, player human.Human
 	// Get the translated name tag of the sent out pokemon
 	translatedName, err := getTranslatedNameTagOfSentOutPokemon(player, actorTypeId, currentName)
 	if err != nil {
-		log.Logger.Warnln("Could not get the translated name tag of the sent out pokemon:", err)
+		log.Logger.Warn("Could not get the translated name tag of the sent out pokemon", "error", err)
 		return true, pk, nil
 	}
 

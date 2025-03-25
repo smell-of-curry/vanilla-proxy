@@ -72,7 +72,7 @@ func FetchDatabase[T any](tableName string) (map[string]T, error) {
 
 	uri := dbConfig.Host + "/api/database/" + dbConfig.Name + "/table/" + tableName
 
-	log.Logger.Printf("Fetching \"%s\" from: \"%s\"\n", tableName, uri)
+	log.Logger.Info("Fetching from database", "table", tableName, "uri", uri)
 
 	client := &http.Client{}
 	var resp *http.Response
@@ -83,7 +83,7 @@ func FetchDatabase[T any](tableName string) (map[string]T, error) {
 	for i := 0; i < retryAttempts; i++ {
 		req, err := http.NewRequest("GET", uri, nil)
 		if err != nil {
-			log.Logger.Errorln("Failed to create new request:", err)
+			log.Logger.Error("Failed to create new request", "error", err)
 			return nil, err
 		}
 
@@ -104,7 +104,7 @@ func FetchDatabase[T any](tableName string) (map[string]T, error) {
 			// Handle 429 status code
 			if i < retryAttempts-1 {
 				retryAfter := time.Duration(1<<i) * time.Second // Exponential backoff
-				log.Logger.Printf("Rate limited, retrying in %s\n", retryAfter)
+				log.Logger.Info("Rate limited, retrying", "delay", retryAfter)
 				time.Sleep(retryAfter)
 				continue
 			}
@@ -137,7 +137,7 @@ func FetchDatabase[T any](tableName string) (map[string]T, error) {
 
 	err = json.Unmarshal(body, &response)
 	if err != nil {
-		LogErrorToDiscord(err)
+		log.Logger.Error("Failed to marshal json", "error", err)
 		return nil, err
 	}
 
@@ -150,7 +150,7 @@ func FetchDatabase[T any](tableName string) (map[string]T, error) {
 
 func LogErrorToDiscord(err error) {
 	config := ReadConfig()
-	log.Logger.Println("Error:", err)
+	log.Logger.Error("Error", "error", err)
 	params := map[string]interface{}{
 		"username":   fmt.Sprintf("[%s] Failed to Ping Database", config.Server.Prefix),
 		"avatar_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTGcSsrxGsP-WcwrSPJCalNokgnVFtho64ycreClTns3g&s",
@@ -198,12 +198,12 @@ func SendStaffAlertToDiscord(title string, description string, color int, fields
 func SendJsonToDiscord(url string, params map[string]interface{}) {
 	jsonParams, err := json.Marshal(params)
 	if err != nil {
-		log.Logger.Println("Failed to marshal json", err)
+		log.Logger.Error("Failed to marshal json", "error", err)
 		return
 	}
 	req, err := http.NewRequest("POST", url, io.NopCloser(bytes.NewBuffer(jsonParams)))
 	if err != nil {
-		log.Logger.Println("Failed to create new request", err)
+		log.Logger.Error("Failed to create new request", "error", err)
 		return
 	}
 	req.Header.Set("Content-Type", "application/json")
@@ -211,7 +211,7 @@ func SendJsonToDiscord(url string, params map[string]interface{}) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Logger.Println("Failed to send json to discord", err)
+		log.Logger.Error("Failed to send json to discord", "error", err)
 		return
 	}
 	defer resp.Body.Close()

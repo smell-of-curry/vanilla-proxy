@@ -13,7 +13,7 @@ type MalformedHandler struct {
 func (MalformedHandler) Handle(pk packet.Packet, player human.Human) (bool, packet.Packet, error) {
 	dataPacket := pk.(*packet.PacketViolationWarning)
 
-	log.Logger.Errorln(player.GetName(), "> Malformed", dataPacket)
+	log.Logger.Error("Malformed packet", "player", player.GetName(), "packet", dataPacket)
 
 	return true, pk, nil
 }

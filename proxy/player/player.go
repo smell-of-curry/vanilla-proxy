@@ -90,7 +90,7 @@ func (player *Player) Transfer(address string, port uint16) {
 	}
 
 	player.DataPacket(pk)
-	log.Logger.Debugln("Player", player.Name, "transferred to", address, port)
+	log.Logger.Debug("Player transferred", "name", player.Name, "address", address, "port", port)
 }
 
 func (player *Player) Kick() {
@@ -189,13 +189,13 @@ func (player *Player) textPacket(message string, textType byte) {
 
 func (player *Player) DataPacket(pk packet.Packet) {
 	if err := player.Session.Connection.ClientConn.WritePacket(pk); err != nil {
-		log.Logger.Errorln(err)
+		log.Logger.Error("Failed to write packet to client", "error", err)
 	}
 }
 
 func (player *Player) DataPacketToServer(pk packet.Packet) {
 	if err := player.Session.Connection.ServerConn.WritePacket(pk); err != nil {
-		log.Logger.Errorln(err)
+		log.Logger.Error("Failed to write packet to server", "error", err)
 	}
 }
 

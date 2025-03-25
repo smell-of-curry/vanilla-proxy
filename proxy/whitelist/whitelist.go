@@ -25,25 +25,30 @@ func Init() *WhitelistManager {
 	if _, err := os.Stat("whitelist.json"); os.IsNotExist(err) {
 		f, err := os.Create("whitelist.json")
 		if err != nil {
-			log.Logger.Fatalf("error creating whitelist: %v", err)
+			log.Logger.Error("Error creating whitelist", "error", err)
+			panic(err)
 		}
 		data, err := json.Marshal(wm.Players)
 		if err != nil {
-			log.Logger.Fatalf("error encoding default whitelist: %v", err)
+			log.Logger.Error("Error encoding default whitelist", "error", err)
+			panic(err)
 		}
 		if _, err := f.Write(data); err != nil {
-			log.Logger.Fatalf("error writing encoded default whitelist: %v", err)
+			log.Logger.Error("Error writing encoded default whitelist", "error", err)
+			panic(err)
 		}
 		_ = f.Close()
 	}
 
 	data, err := os.ReadFile("whitelist.json")
 	if err != nil {
-		log.Logger.Fatalf("error reading whitelist: %v", err)
+		log.Logger.Error("Error reading whitelist", "error", err)
+		panic(err)
 	}
 
 	if err := json.Unmarshal(data, &wm.Players); err != nil {
-		log.Logger.Fatalf("error decoding whitelist: %v", err)
+		log.Logger.Error("Error decoding whitelist", "error", err)
+		panic(err)
 	}
 
 	return wm
@@ -79,17 +84,20 @@ func (wm *WhitelistManager) HasPlayer(name string, xuid string) bool {
 func (wm *WhitelistManager) save() {
 	file, err := os.Create("whitelist.json")
 	if err != nil {
-		log.Logger.Fatalf("error creating whitelist file: %v", err)
+		log.Logger.Error("Error creating whitelist file", "error", err)
+		panic(err)
 	}
 
 	p, err := json.MarshalIndent(wm.Players, "", "\t")
 	if err != nil {
-		log.Logger.Fatalf("error marshaling whitelist: %v", err)
+		log.Logger.Error("Error marshaling whitelist", "error", err)
+		panic(err)
 	}
 
 	_, err = file.Write(p)
 	if err != nil {
-		log.Logger.Fatalf("error writing whitelist: %v", err)
+		log.Logger.Error("Error writing whitelist", "error", err)
+		panic(err)
 	}
 	file.Close()
 }

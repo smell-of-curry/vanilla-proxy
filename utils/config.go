@@ -62,29 +62,34 @@ func ReadConfig() Config {
 	}
 
 	if _, err := os.Stat("config.toml"); os.IsNotExist(err) {
-		log.Logger.Println("config.toml not found, creating default config...")
+		log.Logger.Info("config.toml not found, creating default config")
 		f, err := os.Create("config.toml")
 		if err != nil {
-			log.Logger.Fatalf("error creating config: %v", err)
+			log.Logger.Error("Error creating config", "error", err)
+			panic(err)
 		}
 		data, err := toml.Marshal(defaultConfig)
 		if err != nil {
-			log.Logger.Fatalf("error encoding default config: %v", err)
+			log.Logger.Error("Error encoding default config", "error", err)
+			panic(err)
 		}
 		if _, err := f.Write(data); err != nil {
-			log.Logger.Fatalf("error writing encoded default config: %v", err)
+			log.Logger.Error("Error writing encoded default config", "error", err)
+			panic(err)
 		}
 		_ = f.Close()
 	}
 
 	data, err := os.ReadFile("config.toml")
 	if err != nil {
-		log.Logger.Fatalf("error reading config: %v", err)
+		log.Logger.Error("Error reading config", "error", err)
+		panic(err)
 	}
 
 	c := Config{}
 	if err := toml.Unmarshal(data, &c); err != nil {
-		log.Logger.Fatalf("error decoding config: %v", err)
+		log.Logger.Error("Error decoding config", "error", err)
+		panic(err)
 	}
 
 	// Validate required fields and set defaults if necessary

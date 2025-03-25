@@ -115,16 +115,16 @@ func (hm handlerManager) HandlePacket(pk packet.Packet, player human.Human, send
 func sendDebug(pk packet.Packet, sender string) {
 	switch debug {
 	case debugLevelAll:
-		log.Logger.Debugln(sender, ":", pk.ID(), ">", pk)
+		log.Logger.Debug("Packet debug", "sender", sender, "id", pk.ID(), "packet", pk)
 
 	case debugLevelNotIgnored:
 		if !contains(ignored, pk.ID()) {
-			log.Logger.Debugln(sender, ":", pk.ID(), ">", pk)
+			log.Logger.Debug("Packet debug", "sender", sender, "id", pk.ID(), "packet", pk)
 		}
 
 	case debugLevelTarget:
 		if contains(target, pk.ID()) {
-			log.Logger.Debugln(sender, ":", pk.ID(), ">", pk)
+			log.Logger.Debug("Packet debug", "sender", sender, "id", pk.ID(), "packet", pk)
 		}
 	}
 }

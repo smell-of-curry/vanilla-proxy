@@ -1,22 +1,19 @@
 package log
 
 import (
+	"log/slog"
 	"os"
-
-	"github.com/sirupsen/logrus"
 )
 
-var Logger *logrus.Logger
+var Logger *slog.Logger
 
-func New() *logrus.Logger {
-	log := logrus.New()
-	log.Out = os.Stdout
-	log.Formatter = &logrus.TextFormatter{
-		ForceColors:     true,
-		TimestampFormat: "2006-01-02 15:04:05",
-		FullTimestamp:   true,
+func New() *slog.Logger {
+	opts := &slog.HandlerOptions{
+		Level: slog.LevelDebug,
 	}
-	log.Level = logrus.DebugLevel
 
-	return log
+	handler := slog.NewTextHandler(os.Stdout, opts)
+	logger := slog.New(handler)
+
+	return logger
 }
