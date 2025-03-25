@@ -122,7 +122,7 @@ type ClaimPlayerAuthInputHandler struct{}
 func (ClaimPlayerAuthInputHandler) Handle(pk packet.Packet, player human.Human) (bool, packet.Packet, error) {
 	dataPacket := pk.(*packet.PlayerAuthInput)
 
-	if dataPacket.ClientTick%20 == 0 {
+	if dataPacket.Tick%20 == 0 {
 		playerPing := player.GetPing()
 		formattedPing := strconv.FormatUint(uint64(playerPing), 10)
 		pingStatus := "§a"

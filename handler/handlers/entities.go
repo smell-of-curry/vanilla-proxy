@@ -12,9 +12,9 @@ type AddActorHandler struct{}
 func (ah AddActorHandler) Handle(pk packet.Packet, player human.Human) (bool, packet.Packet, error) {
 	dataPacket := pk.(*packet.AddActor)
 
-	proxy.ProxyInstance.Entities.SetEntity(dataPacket.TargetActorID, entity.EntityData{
-		TypeID:    dataPacket.ActorType,
-		RuntimeID: dataPacket.TargetRuntimeID,
+	proxy.ProxyInstance.Entities.SetEntity(dataPacket.EntityUniqueID, entity.EntityData{
+		TypeID:    dataPacket.EntityType,
+		RuntimeID: dataPacket.EntityRuntimeID,
 	})
 
 	return true, pk, nil

@@ -120,26 +120,26 @@ func (h *AddActorNameTagHandler) Handle(pk packet.Packet, player human.Human) (b
 	dataPacket := pk.(*packet.AddActor)
 
 	// Check if the actor is a pokemon
-	if !strings.HasPrefix(dataPacket.ActorType, "pokemon:") {
+	if !strings.HasPrefix(dataPacket.EntityType, "pokemon:") {
 		return true, pk, nil
 	}
 
 	// Get the current name of the pokemon
-	currentName, ok := dataPacket.ActorData[protocol.EntityDataKeyName].(string)
+	currentName, ok := dataPacket.EntityMetadata[protocol.EntityDataKeyName].(string)
 	if !ok {
 		log.Logger.Warn("Could not assert the current name of the pokemon", "metadata", dataPacket.EntityMetadata[protocol.EntityDataKeyName])
 		return true, pk, nil
 	}
 
 	// Get the translated name tag of the sent out pokemon
-	translatedName, err := getTranslatedNameTagOfSentOutPokemon(player, dataPacket.ActorType, currentName)
+	translatedName, err := getTranslatedNameTagOfSentOutPokemon(player, dataPacket.EntityType, currentName)
 	if err != nil {
 		log.Logger.Warn("Could not get the translated name tag of the sent out pokemon", "error", err)
 		return true, pk, nil
 	}
 
 	// Update the name in the packet
-	dataPacket.ActorData[protocol.EntityDataKeyName] = translatedName
+	dataPacket.EntityMetadata[protocol.EntityDataKeyName] = translatedName
 
 	return true, pk, nil
 }

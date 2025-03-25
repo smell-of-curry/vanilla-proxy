@@ -21,7 +21,7 @@ var target = []uint32{
 var ignored = []uint32{
 	packet.IDAnimate,
 	packet.IDSetActorData,
-	packet.IDMoveDeltaActor,
+	packet.IDMoveActorDelta,
 	packet.IDCreativeContent,
 	packet.IDCraftingData,
 	packet.IDBiomeDefinitionList,
@@ -31,7 +31,7 @@ var ignored = []uint32{
 	packet.IDSetActorMotion,
 	packet.IDUpdateAttributes,
 	packet.IDPlayerAuthInput,
-	packet.IDFullChunkData,
+	packet.IDLevelChunk,
 	packet.IDSubChunk,
 	packet.IDSubChunkRequest,
 }
@@ -52,7 +52,7 @@ func registerHandlers() map[uint32][]handler.PacketHandler {
 	if proxy.ProxyInstance.Worlds != nil {
 		handlers[packet.IDSubChunkRequest] = []handler.PacketHandler{SubChunkRequestHandler{}}
 		handlers[packet.IDSubChunk] = append(handlers[packet.IDSubChunk], SubChunkHandlerBoarder{})
-		handlers[packet.IDFullChunkData] = []handler.PacketHandler{LevelChunkHandler{}}
+		handlers[packet.IDLevelChunk] = []handler.PacketHandler{LevelChunkHandler{}}
 		handlers[packet.IDInventoryTransaction] = []handler.PacketHandler{InventoryTransactionHandler{}}
 	}
 
