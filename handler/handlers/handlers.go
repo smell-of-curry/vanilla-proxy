@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"slices"
 
 	"github.com/HyPE-Network/vanilla-proxy/handler"
 	"github.com/HyPE-Network/vanilla-proxy/log"
@@ -118,24 +119,15 @@ func sendDebug(pk packet.Packet, sender string) {
 		log.Logger.Debug("Packet debug", "sender", sender, "id", pk.ID(), "packet", pk)
 
 	case debugLevelNotIgnored:
-		if !contains(ignored, pk.ID()) {
+		if !slices.Contains(ignored, pk.ID()) {
 			log.Logger.Debug("Packet debug", "sender", sender, "id", pk.ID(), "packet", pk)
 		}
 
 	case debugLevelTarget:
-		if contains(target, pk.ID()) {
+		if slices.Contains(target, pk.ID()) {
 			log.Logger.Debug("Packet debug", "sender", sender, "id", pk.ID(), "packet", pk)
 		}
 	}
-}
-
-func contains(a []uint32, x uint32) bool {
-	for _, n := range a {
-		if x == n {
-			return true
-		}
-	}
-	return false
 }
 
 const (
