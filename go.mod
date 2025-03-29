@@ -3,6 +3,7 @@ module github.com/HyPE-Network/vanilla-proxy
 go 1.24.0
 
 require (
+	github.com/getsentry/sentry-go v0.31.1
 	github.com/go-gl/mathgl v1.2.0
 	github.com/gofrs/flock v0.12.1
 	github.com/google/uuid v1.6.0
@@ -24,6 +25,6 @@ require (
 	golang.org/x/text v0.23.0 // indirect
 )
 
-replace github.com/sandertv/gophertunnel => github.com/smell-of-curry/gophertunnel v0.0.0-20250325223503-3f526531728b
+replace github.com/sandertv/gophertunnel => github.com/smell-of-curry/gophertunnel v0.0.0-20250328154502-5b42dc861018
 
 replace github.com/sandertv/go-raknet => github.com/smell-of-curry/go-raknet v0.0.0-20250314172126-71bb156b6413
