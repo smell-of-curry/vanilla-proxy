@@ -46,6 +46,7 @@ type Config struct {
 		DiscordSignLogsWebhook    string
 		DiscordSignLogsIconURL    string
 		DiscordStaffAlertsWebhook string
+		ProfilerHost              string
 	}
 }
 
@@ -123,6 +124,10 @@ func ReadConfig() Config {
 
 	if c.Logging.DiscordStaffAlertsWebhook == "" {
 		panic("Discord Staff Alerts Webhook must be provided!")
+	}
+
+	if c.Logging.ProfilerHost == "" {
+		c.Logging.ProfilerHost = "127.0.0.1:1010"
 	}
 
 	return c

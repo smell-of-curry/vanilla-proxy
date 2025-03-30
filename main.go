@@ -1,6 +1,7 @@
 package main
 
 import (
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -12,6 +13,8 @@ import (
 	"github.com/HyPE-Network/vanilla-proxy/proxy"
 	"github.com/HyPE-Network/vanilla-proxy/utils"
 	"github.com/sandertv/gophertunnel/minecraft/protocol/packet"
+
+	_ "net/http/pprof"
 )
 
 func main() {
@@ -20,6 +23,13 @@ func main() {
 
 	// Load configuration
 	config := utils.ReadConfig()
+
+	go func() {
+		err := http.ListenAndServe(config.Logging.ProfilerHost, nil)
+		if err != nil {
+			log.Logger.Error("Failed to start pprof server", "error", err)
+		}
+	}()
 
 	proxy.ProxyInstance = proxy.New(config)
 
