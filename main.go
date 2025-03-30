@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/HyPE-Network/vanilla-proxy/custom_handlers"
 	"github.com/HyPE-Network/vanilla-proxy/handler"
@@ -12,6 +13,7 @@ import (
 	"github.com/HyPE-Network/vanilla-proxy/log"
 	"github.com/HyPE-Network/vanilla-proxy/proxy"
 	"github.com/HyPE-Network/vanilla-proxy/utils"
+	"github.com/getsentry/sentry-go"
 	"github.com/sandertv/gophertunnel/minecraft/protocol/packet"
 
 	_ "net/http/pprof"
@@ -23,6 +25,17 @@ func main() {
 
 	// Load configuration
 	config := utils.ReadConfig()
+
+	err := sentry.Init(sentry.ClientOptions{
+		Dsn:        config.Logging.SentryDsn,
+		ServerName: config.Server.Prefix, // Use the server prefix as the server name in Sentry
+	})
+	if err != nil {
+		log.Logger.Error("sentry.Init", "error", err)
+		panic(err) // panic if Sentry fails to initialize
+	}
+	// Flush buffered events before the program terminates.
+	defer sentry.Flush(2 * time.Second)
 
 	go func() {
 		err := http.ListenAndServe(config.Logging.ProfilerHost, nil)

@@ -47,6 +47,7 @@ type Config struct {
 		DiscordSignLogsIconURL    string
 		DiscordStaffAlertsWebhook string
 		ProfilerHost              string
+		SentryDsn                 string // Sentry DSN for error tracking
 	}
 }
 
@@ -128,6 +129,10 @@ func ReadConfig() Config {
 
 	if c.Logging.ProfilerHost == "" {
 		c.Logging.ProfilerHost = "127.0.0.1:1010"
+	}
+
+	if c.Logging.SentryDsn == "" {
+		panic("Sentry DSN must be provided for error tracking!")
 	}
 
 	return c
