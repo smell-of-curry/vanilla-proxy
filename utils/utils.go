@@ -69,12 +69,13 @@ func FormatTime(t time.Time) string {
 // FetchDatabase fetches data from the database and handles 429 rate-limiting errors with retries
 func FetchDatabase[T any](tableName string) (map[string]T, error) {
 	dbConfig := ReadConfig().Database
-
 	uri := dbConfig.Host + "/api/database/" + dbConfig.Name + "/table/" + tableName
 
 	log.Logger.Info("Fetching from database", "table", tableName, "uri", uri)
 
-	client := &http.Client{}
+	client := &http.Client{
+		Timeout: time.Second * 10, // Longer timeout for database operations
+	}
 	var resp *http.Response
 	var err error
 
@@ -92,8 +93,12 @@ func FetchDatabase[T any](tableName string) (map[string]T, error) {
 
 		resp, err = client.Do(req)
 		if err != nil {
-			LogErrorToDiscord(err)
-			return nil, err
+			log.Logger.Warn("Database connection error, retrying...", "error", err, "attempts_left", retryAttempts-i)
+			if i == retryAttempts-1 {
+				LogErrorToDiscord(err)
+			}
+			time.Sleep(time.Duration(1<<i) * time.Second) // Exponential backoff
+			continue
 		}
 		defer resp.Body.Close()
 
@@ -110,7 +115,7 @@ func FetchDatabase[T any](tableName string) (map[string]T, error) {
 			}
 		} else {
 			// Other non-success status codes
-			err := fmt.Errorf("failed to fetch data, status code: %d, body: %s", resp.StatusCode, resp.Body)
+			err := fmt.Errorf("failed to fetch data, status code: %d", resp.StatusCode)
 			LogErrorToDiscord(err)
 			return nil, err
 		}
@@ -151,6 +156,12 @@ func FetchDatabase[T any](tableName string) (map[string]T, error) {
 func LogErrorToDiscord(err error) {
 	config := ReadConfig()
 	log.Logger.Error("Error", "error", err)
+
+	// Don't send to Discord if webhook is not configured
+	if !config.Logging.DiscordLoggingEnabled {
+		return
+	}
+
 	params := map[string]interface{}{
 		"username":   fmt.Sprintf("[%s] Failed to Ping Database", config.Server.Prefix),
 		"avatar_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTGcSsrxGsP-WcwrSPJCalNokgnVFtho64ycreClTns3g&s",
@@ -161,10 +172,15 @@ func LogErrorToDiscord(err error) {
 				"description": fmt.Sprintf("The Proxy has failed to ping the database on port: %s. Please check the database status!", fmt.Sprint(config.Database.Host)),
 				"color":       16711680,
 				"timestamp":   time.Now().Format(time.RFC3339),
-				"fields": []map[string]interface{}{
+				"fields": []map[string]any{
 					{
 						"name":   "Error",
 						"value":  err.Error(),
+						"inline": true,
+					},
+					{
+						"name":   "Time",
+						"value":  time.Now().Format("01/02/2006 3:04 PM"),
 						"inline": true,
 					},
 				},
@@ -177,11 +193,11 @@ func LogErrorToDiscord(err error) {
 
 func SendStaffAlertToDiscord(title string, description string, color int, fields []map[string]interface{}) {
 	config := ReadConfig()
-	params := map[string]interface{}{
+	params := map[string]any{
 		"username":   fmt.Sprintf("[%s] Staff Alert", config.Server.Prefix),
 		"avatar_url": "https://media.forgecdn.net/avatars/121/268/636409261203329160.png",
 		"content":    "@everyone",
-		"embeds": []map[string]interface{}{
+		"embeds": []map[string]any{
 			{
 				"title":       title,
 				"description": description,
@@ -195,7 +211,7 @@ func SendStaffAlertToDiscord(title string, description string, color int, fields
 	SendJsonToDiscord(config.Logging.DiscordStaffAlertsWebhook, params)
 }
 
-func SendJsonToDiscord(url string, params map[string]interface{}) {
+func SendJsonToDiscord(url string, params map[string]any) {
 	jsonParams, err := json.Marshal(params)
 	if err != nil {
 		log.Logger.Error("Failed to marshal json", "error", err)
@@ -241,7 +257,17 @@ func GetXboxIconLink(xuid string, xboxApiKey string) (string, error) {
 	maxRetries := 5
 	backoff := time.Second
 
-	client := &http.Client{}
+	// Use a more resilient transport with longer timeouts
+	transport := &http.Transport{
+		TLSHandshakeTimeout: 10 * time.Second,
+		IdleConnTimeout:     30 * time.Second,
+		DisableKeepAlives:   false,
+	}
+	client := &http.Client{
+		Transport: transport,
+		Timeout:   15 * time.Second,
+	}
+
 	url := fmt.Sprintf("https://xbl.io/api/v2/account/%s", xuid)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
@@ -256,15 +282,18 @@ func GetXboxIconLink(xuid string, xboxApiKey string) (string, error) {
 	for maxRetries > 0 {
 		resp, err = client.Do(req)
 		if err != nil {
-			LogErrorToDiscord(err)
-			return "", fmt.Errorf("failed to fetch xbox icon link: %w", err)
+			log.Logger.Warn("Xbox API connection error, retrying...", "error", err, "attempts_left", maxRetries)
+			maxRetries--
+			time.Sleep(backoff)
+			backoff *= 2
+			continue
 		}
 		defer resp.Body.Close()
 
 		if resp.StatusCode == http.StatusTooManyRequests {
 			// Handle 429 error with retry after exponential backoff
 			maxRetries--
-			log.Logger.Warn("Received 429 Too Many Requests, retrying...\n", "attempt", maxRetries)
+			log.Logger.Warn("Received 429 Too Many Requests, retrying...", "attempt", 5-maxRetries)
 
 			retryAfter := resp.Header.Get("Retry-After")
 			if retryAfter != "" {
@@ -288,7 +317,7 @@ func GetXboxIconLink(xuid string, xboxApiKey string) (string, error) {
 	}
 
 	if maxRetries <= 0 {
-		return "", fmt.Errorf("exceeded maximum retries after 429 Too Many Requests")
+		return "", fmt.Errorf("exceeded maximum retries after connection issues")
 	}
 
 	body, err := io.ReadAll(resp.Body)
