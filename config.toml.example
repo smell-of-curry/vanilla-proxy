@@ -1,51 +1,43 @@
-
-[Api]
-ApiHost = "https://pokebedrock.com"
-ApiKey = "xxxxxxxx-xxxxxxxx-xxxxxxxx"
-XboxApiKey = "xxxxxxxx-xxxxxxxx-xxxxxxxx"
-
-[Bot]
-DisplayName = ""
-Enabled = false
-XUID = ""
-
 [Connection]
-ProxyAddress = "0.0.0.0:19132"
-RemoteAddress = "0.0.0.0:19134"
-
-[Database]
-Host = "http://127.0.0.1:3230"
-Key = "xxxxxxxx-xxxxxxxx-xxxxxxxx"
-Name = "testing"
-
-[Logging]
-DiscordChatLogsWebhook = "https://discord.com/api/webhooks/1111111111111111/xxxxxxxx-xxxxxxxx-xxxxxxxx"
-DiscordCommandLogsWebhook = "https://discord.com/api/webhooks/1111111111111111/xxxxxxxx-xxxxxxxx-xxxxxxxx"
-DiscordSignLogsIconURL = "https://media.forgecdn.net/avatars/121/268/636409261203329160.png"
-DiscordSignLogsWebhook = "https://discord.com/api/webhooks/1111111111111111/xxxxxxxx-xxxxxxxx-xxxxxxxx"
-DiscordStaffAlertsWebhook = "https://discord.com/api/webhooks/1111111111111111/xxxxxxxx-xxxxxxxx-xxxxxxxx"
-
-[Rcon]
-Enabled = false
-Password = ""
-Port = 0
-
-[Resources]
-PackURLs = []
-PackPaths = []
+ProxyAddress = "0.0.0.0:19132" # The port that players will connect to
+RemoteAddress = "0.0.0.0:19134" # The port that the BDS server is hosted on
 
 [Server]
-SecuredSlots = 5
-DisableXboxAuth = false
-Ops = ["Smell of curry"]
-Prefix = "TESTING"
-ViewDistance = 10
-Whitelist = true
-FlushRate = 10
+Whitelist = true # Whether to enable whitelisting
+SecuredSlots = 5 # The amount of secured slots on the server for only whitelisted players
+ViewDistance = 10 # The view distance for players
+DisableXboxAuth = false # Whether to disable Xbox authentication (This cant be enabled currently)
+FlushRate = 10 # The flush rate for the server
+Prefix = "TESTING" # The prefix for the server, used for logging and discord messages
 
 [WorldBorder]
-Enabled = true
-MaxX = 12000
-MaxZ = 12000
-MinX = -12000
-MinZ = -12000
+Enabled = true # Whether to enable the world border
+MinX = -12000 # The minimum X coordinate for the world border
+MaxX = 12000 # The maximum X coordinate for the world border
+MinZ = -12000 # The minimum Z coordinate for the world border
+MaxZ = 12000 # The maximum Z coordinate for the world border
+
+[Api]
+ApiHost = "https://pokebedrock.com" # The host for the moderation API
+ApiKey = "xxxxxxxx-xxxxxxxx-xxxxxxxx" # The API key for the moderation API
+XboxApiKey = "xxxxxxxx-xxxxxxxx-xxxxxxxx" # The Xbox API key for profile picture fetching
+
+[Resources]
+PackURLs = [] # Urls of resource packs to require downloaded by players
+PackPaths = [] # Paths of resource packs to require downloaded by players
+
+[Database]
+Host = "http://127.0.0.1:3000" # The host for the database
+Key = "xxxxxxxx-xxxxxxxx-xxxxxxxx" # The key for the database
+Name = "testing" # The name of the database (Should be close to Server.Prefix)
+
+[Logging]
+# Enables Discord logging for chat, command and sign logs
+DiscordLoggingEnabled = false
+DiscordChatLogsWebhook = "https://discord.com/api/webhooks/1111111111111111/xxxxxxxx-xxxxxxxx-xxxxxxxx"
+DiscordCommandLogsWebhook = "https://discord.com/api/webhooks/1111111111111111/xxxxxxxx-xxxxxxxx-xxxxxxxx"
+DiscordSignLogsWebhook = "https://discord.com/api/webhooks/1111111111111111/xxxxxxxx-xxxxxxxx-xxxxxxxx"
+DiscordStaffAlertsWebhook = "https://discord.com/api/webhooks/1111111111111111/xxxxxxxx-xxxxxxxx-xxxxxxxx"
+ProfilerHost = "127.0.0.1:19135" # The host for the profiler to view the server performance
+# SentryDsn is optional - remove or leave empty to disable Sentry error tracking
+SentryDsn = "https://xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx@xxxxxxx.ingest.sentry.io/xxxxxxx"

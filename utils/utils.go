@@ -179,7 +179,7 @@ func SendStaffAlertToDiscord(title string, description string, color int, fields
 	config := ReadConfig()
 	params := map[string]interface{}{
 		"username":   fmt.Sprintf("[%s] Staff Alert", config.Server.Prefix),
-		"avatar_url": config.Logging.DiscordSignLogsIconURL,
+		"avatar_url": "https://media.forgecdn.net/avatars/121/268/636409261203329160.png",
 		"content":    "@everyone",
 		"embeds": []map[string]interface{}{
 			{
@@ -232,7 +232,7 @@ var (
 
 // GetXboxIconLink retrieves the Xbox profile picture URL for the given XUID.
 // It first checks if the URL is cached; if not, it fetches it from the API with error handling for 429 status codes.
-func GetXboxIconLink(xuid string) (string, error) {
+func GetXboxIconLink(xuid string, xboxApiKey string) (string, error) {
 	if cache, ok := profilePictureUrls.Load(xuid); ok {
 		return cache.(string), nil
 	}
@@ -249,7 +249,7 @@ func GetXboxIconLink(xuid string) (string, error) {
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("X-Authorization", "2a9b346e-f957-4325-8d8e-a5c76c315730")
+	req.Header.Set("X-Authorization", xboxApiKey)
 
 	var resp *http.Response
 

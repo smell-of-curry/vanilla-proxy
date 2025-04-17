@@ -26,16 +26,21 @@ func main() {
 	// Load configuration
 	config := utils.ReadConfig()
 
-	err := sentry.Init(sentry.ClientOptions{
-		Dsn:        config.Logging.SentryDsn,
-		ServerName: config.Server.Prefix, // Use the server prefix as the server name in Sentry
-	})
-	if err != nil {
-		log.Logger.Error("sentry.Init", "error", err)
-		panic(err) // panic if Sentry fails to initialize
+	// Initialize Sentry only if DSN is provided
+	if config.Logging.SentryDsn != "" {
+		err := sentry.Init(sentry.ClientOptions{
+			Dsn:        config.Logging.SentryDsn,
+			ServerName: config.Server.Prefix, // Use the server prefix as the server name in Sentry
+		})
+		if err != nil {
+			log.Logger.Error("sentry.Init", "error", err)
+			panic(err) // panic if Sentry fails to initialize
+		}
+		// Flush buffered events before the program terminates.
+		defer sentry.Flush(2 * time.Second)
+	} else {
+		log.Logger.Info("Sentry DSN not provided, error tracking is disabled")
 	}
-	// Flush buffered events before the program terminates.
-	defer sentry.Flush(2 * time.Second)
 
 	go func() {
 		err := http.ListenAndServe(config.Logging.ProfilerHost, nil)

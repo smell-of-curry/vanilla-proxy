@@ -61,7 +61,6 @@ This proxy uses a bit of logging so that the discord and the staff team are upda
 
 - `DiscordChatLogsWebhook` - this is the endpoint you want chat logs sent too.
 - `DiscordCommandLogsWebhook` - this is the endpoint where when players use commands get sent too.
-- `DiscordSignLogsIconURL` - This is a icon to be used when a sign log is sent.
 - `DiscordSignLogsWebhook` this is the destination for where sign edit logs should be sent.
 - `DiscordStaffAlertsWebhook` - this is a endpoint for staff alerts, things like failed to ping database, etc.
 

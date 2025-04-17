@@ -30,17 +30,17 @@ func (h ChatLoggingHandler) Handle(pk packet.Packet, player human.Human) (bool, 
 		return true, pk, nil
 	}
 
-	avatar_url, err := utils.GetXboxIconLink(player.GetSession().IdentityData.XUID)
+	avatar_url, err := utils.GetXboxIconLink(player.GetSession().IdentityData.XUID, proxy.ProxyInstance.Config.Api.XboxApiKey)
 	if err != nil {
-		avatar_url = proxy.ProxyInstance.Config.Logging.DiscordSignLogsIconURL
+		avatar_url = "https://media.forgecdn.net/avatars/121/268/636409261203329160.png"
 	}
 
 	// Log message to discord.
-	utils.SendJsonToDiscord(proxy.ProxyInstance.Config.Logging.DiscordChatLogsWebhook, map[string]interface{}{
+	utils.SendJsonToDiscord(proxy.ProxyInstance.Config.Logging.DiscordChatLogsWebhook, map[string]any{
 		"username":   fmt.Sprintf("[%s] %s", proxy.ProxyInstance.Config.Server.Prefix, player.GetName()),
 		"avatar_url": avatar_url,
 		"content":    dataPacket.Message,
-		"allowed_mentions": map[string]interface{}{
+		"allowed_mentions": map[string]any{
 			"parse": []string{},
 		},
 	})
