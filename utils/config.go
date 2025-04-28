@@ -44,6 +44,9 @@ type Config struct {
 		Key  string
 		Name string
 	}
+	Encryption struct {
+		Key string
+	}
 	Logging struct {
 		DiscordLoggingEnabled     bool
 		DiscordCommandLogsWebhook string
@@ -92,6 +95,11 @@ func ReadConfig() Config {
 			MinZ:    -12000,
 			MaxX:    12000,
 			MaxZ:    12000,
+		},
+		Encryption: struct {
+			Key string
+		}{
+			Key: "default_encryption_key_change_me",
 		},
 		Logging: struct {
 			DiscordLoggingEnabled     bool
@@ -186,6 +194,10 @@ func ReadConfig() Config {
 
 	if c.Database.Name == "" {
 		panic("Database Name must be provided!")
+	}
+
+	if c.Encryption.Key == "" || c.Encryption.Key == "default_encryption_key_change_me" {
+		log.Logger.Warn("Using default encryption key. Please change this in your config!")
 	}
 
 	if c.Logging.DiscordLoggingEnabled {

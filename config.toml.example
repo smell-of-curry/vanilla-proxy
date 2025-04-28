@@ -31,6 +31,9 @@ Host = "http://127.0.0.1:3000" # The host for the database
 Key = "xxxxxxxx-xxxxxxxx-xxxxxxxx" # The key for the database
 Name = "testing" # The name of the database (Should be close to Server.Prefix)
 
+[Encryption]
+Key = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" # The key for the encryption
+
 [Logging]
 # Enables Discord logging for chat, command and sign logs
 DiscordLoggingEnabled = false

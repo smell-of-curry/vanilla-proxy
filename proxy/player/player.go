@@ -212,11 +212,21 @@ func (player *Player) PlaySound(soundName string, pos mgl32.Vec3, volume float32
 
 func (player *Player) SendXUIDToAddon() {
 	playerXuid := player.GetSession().IdentityData.XUID
+	message := "XUID=" + playerXuid + " | NAME=" + player.GetName()
+
+	// Encrypt Message with database key
+	config := utils.ReadConfig()
+	encryptedMessage, err := utils.EncryptMessage(message, config.Encryption.Key)
+	if err != nil {
+		log.Logger.Error("Failed to encrypt XUID message", "error", err)
+		return
+	}
+
 	playerXuidTextPacket := &packet.Text{
 		TextType:         packet.TextTypeChat,
 		NeedsTranslation: false,
 		SourceName:       player.GetName(),
-		Message:          "[PROXY_SYSTEM] XUID=" + playerXuid,
+		Message:          "[PROXY_XUID] " + encryptedMessage,
 		Parameters:       nil,
 		XUID:             playerXuid,
 		PlatformChatID:   "",
