@@ -85,12 +85,12 @@ func Init() (*PlayerlistManager, error) {
 // GetConnIdentityData returns the identity data for a player's connection
 func (plm *PlayerlistManager) GetConnIdentityData(conn *minecraft.Conn) (login.IdentityData, error) {
 	plm.mu.Lock()
+	defer plm.mu.Unlock() // Keep mutex locked for the entire operation
 
 	identityData := conn.IdentityData()
 	xuid := identityData.XUID
 
 	if player, ok := plm.Players[xuid]; ok {
-		plm.mu.Unlock()
 		return login.IdentityData{
 			XUID:        xuid,
 			DisplayName: player.PlayerName,
@@ -99,33 +99,50 @@ func (plm *PlayerlistManager) GetConnIdentityData(conn *minecraft.Conn) (login.I
 		}, nil
 	}
 
-	plm.mu.Unlock() // Unlock the mutex before calling SetPlayer
+	// Set player with mutex still locked
+	player := Player{
+		PlayerName:         conn.IdentityData().DisplayName,
+		Identity:           conn.IdentityData().Identity,
+		ClientSelfSignedID: conn.ClientData().SelfSignedID,
+	}
+	plm.Players[xuid] = player
 
-	if err := plm.SetPlayer(xuid, conn); err != nil {
+	// Save the playerlist to disk
+	err := plm.savePlayerlist()
+	if err != nil {
 		return login.IdentityData{}, err
 	}
+
 	return identityData, nil
 }
 
 // GetConnClientData returns the client data for a player's connection
 func (plm *PlayerlistManager) GetConnClientData(conn *minecraft.Conn) (login.ClientData, error) {
 	plm.mu.Lock()
+	defer plm.mu.Unlock() // Keep mutex locked for the entire operation
 
 	xuid := conn.IdentityData().XUID
 	clientData := conn.ClientData()
 
 	if player, ok := plm.Players[xuid]; ok {
 		clientData.SelfSignedID = player.ClientSelfSignedID
-
-		plm.mu.Unlock()
 		return clientData, nil
 	}
 
-	plm.mu.Unlock() // Unlock the mutex before calling SetPlayer
+	// Set player with mutex still locked
+	player := Player{
+		PlayerName:         conn.IdentityData().DisplayName,
+		Identity:           conn.IdentityData().Identity,
+		ClientSelfSignedID: conn.ClientData().SelfSignedID,
+	}
+	plm.Players[xuid] = player
 
-	if err := plm.SetPlayer(xuid, conn); err != nil {
+	// Save the playerlist to disk
+	err := plm.savePlayerlist()
+	if err != nil {
 		return login.ClientData{}, err
 	}
+
 	return clientData, nil
 }
 
@@ -154,22 +171,6 @@ func (plm *PlayerlistManager) GetPlayer(xuid string) (Player, error) {
 	}
 
 	return player, nil
-}
-
-func (plm *PlayerlistManager) SetPlayer(xuid string, conn *minecraft.Conn) error {
-	plm.mu.Lock()
-	defer plm.mu.Unlock()
-
-	player := Player{
-		PlayerName:         conn.IdentityData().DisplayName,
-		Identity:           conn.IdentityData().Identity,
-		ClientSelfSignedID: conn.ClientData().SelfSignedID,
-		// IconURL and IconFetchTime will be set when the icon is fetched
-	}
-	plm.Players[xuid] = player
-
-	// Save the playerlist to disk
-	return plm.savePlayerlist()
 }
 
 // savePlayerlist saves the current playerlist to the JSON file
