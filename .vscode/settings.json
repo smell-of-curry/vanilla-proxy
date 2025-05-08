@@ -4,6 +4,7 @@
         "Debugln",
         "Errorln",
         "gophertunnel",
+        "hujson",
         "iconcache",
         "Infoln",
         "logrus",
