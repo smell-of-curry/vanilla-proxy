@@ -25,6 +25,6 @@ require (
 	golang.org/x/text v0.23.0 // indirect
 )
 
-replace github.com/sandertv/gophertunnel => github.com/smell-of-curry/gophertunnel v1.46.1-0.20250514165854-eb00f4647fb8
+replace github.com/sandertv/gophertunnel => github.com/smell-of-curry/gophertunnel v1.46.1-0.20250528213944-60478972e9d0
 
-replace github.com/sandertv/go-raknet => github.com/smell-of-curry/go-raknet v0.0.0-20250525222440-f01e8a792036
+replace github.com/sandertv/go-raknet => github.com/smell-of-curry/go-raknet v0.0.0-20250525005230-991ee492a907
