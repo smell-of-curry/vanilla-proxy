@@ -14,17 +14,16 @@ require (
 )
 
 require (
-	github.com/go-jose/go-jose/v4 v4.0.5 // indirect
+	github.com/go-jose/go-jose/v4 v4.1.0 // indirect
 	github.com/golang/snappy v1.0.0 // indirect
 	github.com/klauspost/compress v1.18.0 // indirect
 	github.com/muhammadmuzzammil1998/jsonc v1.0.0 // indirect
-	golang.org/x/crypto v0.36.0 // indirect
 	golang.org/x/net v0.37.0 // indirect
 	golang.org/x/oauth2 v0.28.0 // indirect
 	golang.org/x/sys v0.31.0 // indirect
 	golang.org/x/text v0.23.0 // indirect
 )
 
-replace github.com/sandertv/gophertunnel => github.com/smell-of-curry/gophertunnel v1.46.1-0.20250619134746-4e3dc6957f2f
+replace github.com/sandertv/gophertunnel => github.com/smell-of-curry/gophertunnel v1.46.1-0.20250704012025-8e86404b4050
 
 replace github.com/sandertv/go-raknet => github.com/smell-of-curry/go-raknet v0.0.0-20250525005230-991ee492a907
