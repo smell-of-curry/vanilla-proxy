@@ -1,3 +1,6 @@
+> [!WARNING]
+> # This Project has been Archived, and is no longer maintained. For a more up to date proxy, with way more features, please use [GoBDS](https://github.com/smell-of-curry/gobds)
+
 # Vanilla Proxy
 
 Vanilla Proxy is a simple proxy servers that enabled Packet management and protection of BDS server attacks through a end to end proxy system.
